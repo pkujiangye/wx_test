@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>wx client</title>
+	<link rel="stylesheet" href="/css/1.css" />
+	<link rel="stylesheet" href="/assets/bower_components/bootstrap/dist/css/bootstrap.min.css" />
+
+	<script type="text/javascript" src="/assets/bower_components/angular/angular.min.js"></script>
+	<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+
+
+
+</head>
+<body>
+	<div ng-app="app" ng-controller="ctrl">
+		欢迎来到微信墙，你可以发表你的文字了
+		<ul>
+			<li ng-repeat="message in messages track by $index">
+				<div class="row">
+					<div class="col-sm-1">
+										
+						<img height="50" width="50" src="{{message.user.headimgurl}}">
+						<p>
+							{{message.user.nickname}}	
+						</p>
+									
+					</div>
+					<div class="col-sm-4">
+							{{message.xml.Content[0]}}
+					</div>
+				</div>
+			</li>
+		</ul>
+
+	</div>
+	<script type="text/javascript">
+		//创建模型
+		var app = angular.module('app', []);
+		//创建控制器
+		app.controller('ctrl', function ($scope) {
+			var Msgs = [];
+			var socket = io.connect('/');
+
+			socket.emit('getAllMessages');
+
+			socket.on('connected', function() {
+				console.log('connected:connected to wx client!');
+			});
+			socket.on('newClient', function (socket) {
+				console.log('newClient:', socket);
+			});
+
+			
+			socket.on('newMessage', function (message) {
+				console.log('Get a new message:', message);
+				Msgs.unshift(message)
+				$scope.$apply(function () {
+					$scope.messages = Msgs;
+				});
+			});
+
+		});
+
+	</script>
+	<script src="/assets/bower_components/jquery/dist/jquery.min.js"></script>
+	<script src="/assets/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
